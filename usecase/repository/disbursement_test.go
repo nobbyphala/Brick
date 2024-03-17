@@ -347,7 +347,7 @@ func Test_disbursementRepository_UpdateById(t *testing.T) {
 		status = $6,
 		updated_at = CURRENT_TIMESTAMP
 	WHERE
-		id = $8`, gomock.Any()).Return(mockResult, nil)
+		id = $7`, gomock.Any()).Return(mockResult, nil)
 			},
 		},
 		{
@@ -382,7 +382,7 @@ func Test_disbursementRepository_UpdateById(t *testing.T) {
 		status = $6,
 		updated_at = CURRENT_TIMESTAMP
 	WHERE
-		id = $8`, gomock.Any()).Return(mockResult, nil)
+		id = $7`, gomock.Any()).Return(mockResult, nil)
 			},
 		},
 		{
@@ -417,7 +417,7 @@ func Test_disbursementRepository_UpdateById(t *testing.T) {
 		status = $6,
 		updated_at = CURRENT_TIMESTAMP
 	WHERE
-		id = $8`, gomock.Any()).Return(mockResult, nil)
+		id = $7`, gomock.Any()).Return(mockResult, nil)
 			},
 		},
 		{
@@ -451,7 +451,7 @@ func Test_disbursementRepository_UpdateById(t *testing.T) {
 		status = $6,
 		updated_at = CURRENT_TIMESTAMP
 	WHERE
-		id = $8`, gomock.Any()).Return(mockResult, errors.New("error exec query"))
+		id = $7`, gomock.Any()).Return(mockResult, errors.New("error exec query"))
 			},
 		},
 	}

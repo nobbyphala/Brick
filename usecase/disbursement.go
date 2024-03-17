@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/nobbyphala/Brick/domain"
 	"github.com/nobbyphala/Brick/domain/internal_error"
+	"github.com/nobbyphala/Brick/external/database"
 	"github.com/nobbyphala/Brick/usecase/api"
 	"github.com/nobbyphala/Brick/usecase/repository"
 	"log"
@@ -13,17 +14,20 @@ import (
 type disbursementUsecase struct {
 	bankApi                api.Bank
 	disbursementRepository repository.Disbursement
+	utilsRepository        repository.Utils
 }
 
 type DisbursementDeps struct {
 	BankApi                api.Bank
 	DisbursementRepository repository.Disbursement
+	UtilsRepository        repository.Utils
 }
 
 func NewDisbursement(deps DisbursementDeps) *disbursementUsecase {
 	return &disbursementUsecase{
 		bankApi:                deps.BankApi,
 		disbursementRepository: deps.DisbursementRepository,
+		utilsRepository:        deps.UtilsRepository,
 	}
 }
 
@@ -88,38 +92,42 @@ func (disb disbursementUsecase) Disburse(ctx context.Context, disbursement domai
 }
 
 func (disb disbursementUsecase) ProcessBankCallback(ctx context.Context, bankCallback BankCallbackData) error {
-	disbursement, err := disb.disbursementRepository.GetByTransactionId(ctx, bankCallback.TransactionId)
-	if err != nil {
-		log.Println(err)
-		return internal_error.ErrHandleBankCallback
-	}
+	err := disb.utilsRepository.RunWithTransaction(ctx, func(Tx database.SQLDatabase) error {
+		disbursement, err := disb.disbursementRepository.WithTx(Tx).GetByTransactionId(ctx, bankCallback.TransactionId)
+		if err != nil {
+			log.Println(err)
+			return internal_error.ErrHandleBankCallback
+		}
 
-	if disbursement == nil {
-		log.Println("error disbursement not found")
-		return internal_error.ErrDisbursementNotFound
-	}
+		if disbursement == nil {
+			log.Println("error disbursement not found")
+			return internal_error.ErrDisbursementNotFound
+		}
 
-	if disbursement.Status != domain.DisbursementStatusPending {
-		// invalid status need manual intervention
-		err = internal_error.ErrDisbursementInvalidStatus
-		log.Println(fmt.Sprintf("error status should be %d but got %d", domain.DisbursementStatusPending, disbursement.Status))
-		return err
-	}
+		if disbursement.Status != domain.DisbursementStatusPending {
+			// invalid status need manual intervention
+			err = internal_error.ErrDisbursementInvalidStatus
+			log.Println(fmt.Sprintf("error status should be %d but got %d", domain.DisbursementStatusPending, disbursement.Status))
+			return err
+		}
 
-	err = disb.disbursementRepository.UpdateById(ctx, disbursement.Id, domain.Disbursement{
-		RecipientName:          disbursement.RecipientName,
-		RecipientAccountNumber: disbursement.RecipientAccountNumber,
-		RecipientBankCode:      disbursement.RecipientBankCode,
-		BankTransactionId:      disbursement.BankTransactionId,
-		Amount:                 disbursement.Amount,
-		Status:                 disb.mapTransferStatusToDisbursementStatus(bankCallback.Status),
+		err = disb.disbursementRepository.WithTx(Tx).UpdateById(ctx, disbursement.Id, domain.Disbursement{
+			RecipientName:          disbursement.RecipientName,
+			RecipientAccountNumber: disbursement.RecipientAccountNumber,
+			RecipientBankCode:      disbursement.RecipientBankCode,
+			BankTransactionId:      disbursement.BankTransactionId,
+			Amount:                 disbursement.Amount,
+			Status:                 disb.mapTransferStatusToDisbursementStatus(bankCallback.Status),
+		})
+		if err != nil {
+			log.Println(err)
+			return internal_error.ErrUpdateDisbursementStatus
+		}
+
+		return nil
 	})
-	if err != nil {
-		log.Println(err)
-		return internal_error.ErrUpdateDisbursementStatus
-	}
 
-	return nil
+	return err
 }
 
 func (disb disbursementUsecase) mapTransferStatusToDisbursementStatus(transferStatus api.TransferStatus) domain.DisbursementStatus {

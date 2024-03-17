@@ -31,7 +31,7 @@ const (
 		status = $6,
 		updated_at = CURRENT_TIMESTAMP
 	WHERE
-		id = $8`
+		id = $7`
 
 	querySelectByBankTransactionId = `
 	SELECT

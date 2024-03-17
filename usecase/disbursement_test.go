@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"github.com/nobbyphala/Brick/domain"
+	"github.com/nobbyphala/Brick/external/database"
+	"github.com/nobbyphala/Brick/mock"
 	mock_api "github.com/nobbyphala/Brick/mock/api"
 	mock_repository "github.com/nobbyphala/Brick/mock/repository"
 	"github.com/nobbyphala/Brick/usecase/api"
@@ -265,12 +267,15 @@ func Test_disbursementUsecase_ProcessBankCallback(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
+	mockSQL := mock.NewMockSQLDatabase(ctrl)
 	mockBankApi := mock_api.NewMockBank(ctrl)
 	mockDisbursementRepo := mock_repository.NewMockDisbursement(ctrl)
+	mockUtilRepo := mock_repository.NewMockUtils(ctrl)
 
 	type fields struct {
 		bankApi                api.Bank
 		disbursementRepository repository.Disbursement
+		utilsRepository        repository.Utils
 	}
 	type args struct {
 		ctx          context.Context
@@ -288,6 +293,7 @@ func Test_disbursementUsecase_ProcessBankCallback(t *testing.T) {
 			fields: fields{
 				bankApi:                mockBankApi,
 				disbursementRepository: mockDisbursementRepo,
+				utilsRepository:        mockUtilRepo,
 			},
 			args: args{
 				ctx: context.TODO(),
@@ -298,6 +304,7 @@ func Test_disbursementUsecase_ProcessBankCallback(t *testing.T) {
 			},
 			wantErr: nil,
 			mock: func() {
+				mockDisbursementRepo.EXPECT().WithTx(gomock.Any()).Return(mockDisbursementRepo).Times(2)
 				mockDisbursementRepo.EXPECT().GetByTransactionId(gomock.Any(), "txn-id-1").Return(&domain.Disbursement{
 					Id:                     "disb-id-1",
 					RecipientName:          "Nobby Phala",
@@ -315,6 +322,9 @@ func Test_disbursementUsecase_ProcessBankCallback(t *testing.T) {
 					Amount:                 60000,
 					Status:                 2,
 				}).Return(nil)
+				mockUtilRepo.EXPECT().RunWithTransaction(gomock.Any(), gomock.Any()).DoAndReturn(func(ctx context.Context, handler func(Tx database.SQLDatabase) error) error {
+					return handler(mockSQL)
+				})
 			},
 		},
 		{
@@ -322,6 +332,7 @@ func Test_disbursementUsecase_ProcessBankCallback(t *testing.T) {
 			fields: fields{
 				bankApi:                mockBankApi,
 				disbursementRepository: mockDisbursementRepo,
+				utilsRepository:        mockUtilRepo,
 			},
 			args: args{
 				ctx: context.TODO(),
@@ -332,6 +343,7 @@ func Test_disbursementUsecase_ProcessBankCallback(t *testing.T) {
 			},
 			wantErr: errors.New("error when updated disbursement status"),
 			mock: func() {
+				mockDisbursementRepo.EXPECT().WithTx(gomock.Any()).Return(mockDisbursementRepo).Times(2)
 				mockDisbursementRepo.EXPECT().GetByTransactionId(gomock.Any(), "txn-id-1").Return(&domain.Disbursement{
 					Id:                     "disb-id-1",
 					RecipientName:          "Nobby Phala",
@@ -349,6 +361,9 @@ func Test_disbursementUsecase_ProcessBankCallback(t *testing.T) {
 					Amount:                 60000,
 					Status:                 2,
 				}).Return(errors.New("error update database"))
+				mockUtilRepo.EXPECT().RunWithTransaction(gomock.Any(), gomock.Any()).DoAndReturn(func(ctx context.Context, handler func(Tx database.SQLDatabase) error) error {
+					return handler(mockSQL)
+				})
 			},
 		},
 		{
@@ -356,6 +371,7 @@ func Test_disbursementUsecase_ProcessBankCallback(t *testing.T) {
 			fields: fields{
 				bankApi:                mockBankApi,
 				disbursementRepository: mockDisbursementRepo,
+				utilsRepository:        mockUtilRepo,
 			},
 			args: args{
 				ctx: context.TODO(),
@@ -366,6 +382,10 @@ func Test_disbursementUsecase_ProcessBankCallback(t *testing.T) {
 			},
 			wantErr: errors.New("error invalid disbursement status"),
 			mock: func() {
+				mockDisbursementRepo.EXPECT().WithTx(gomock.Any()).Return(mockDisbursementRepo).Times(1)
+				mockUtilRepo.EXPECT().RunWithTransaction(gomock.Any(), gomock.Any()).DoAndReturn(func(ctx context.Context, handler func(Tx database.SQLDatabase) error) error {
+					return handler(mockSQL)
+				})
 				mockDisbursementRepo.EXPECT().GetByTransactionId(gomock.Any(), "txn-id-1").Return(&domain.Disbursement{
 					Id:                     "disb-id-1",
 					RecipientName:          "Nobby Phala",
@@ -382,6 +402,7 @@ func Test_disbursementUsecase_ProcessBankCallback(t *testing.T) {
 			fields: fields{
 				bankApi:                mockBankApi,
 				disbursementRepository: mockDisbursementRepo,
+				utilsRepository:        mockUtilRepo,
 			},
 			args: args{
 				ctx: context.TODO(),
@@ -392,6 +413,10 @@ func Test_disbursementUsecase_ProcessBankCallback(t *testing.T) {
 			},
 			wantErr: errors.New("error disbursement not found"),
 			mock: func() {
+				mockDisbursementRepo.EXPECT().WithTx(gomock.Any()).Return(mockDisbursementRepo).Times(1)
+				mockUtilRepo.EXPECT().RunWithTransaction(gomock.Any(), gomock.Any()).DoAndReturn(func(ctx context.Context, handler func(Tx database.SQLDatabase) error) error {
+					return handler(mockSQL)
+				})
 				mockDisbursementRepo.EXPECT().GetByTransactionId(gomock.Any(), "txn-id-1").Return(nil, nil)
 			},
 		},
@@ -400,6 +425,7 @@ func Test_disbursementUsecase_ProcessBankCallback(t *testing.T) {
 			fields: fields{
 				bankApi:                mockBankApi,
 				disbursementRepository: mockDisbursementRepo,
+				utilsRepository:        mockUtilRepo,
 			},
 			args: args{
 				ctx: context.TODO(),
@@ -410,6 +436,10 @@ func Test_disbursementUsecase_ProcessBankCallback(t *testing.T) {
 			},
 			wantErr: errors.New("error when processing bank callback"),
 			mock: func() {
+				mockDisbursementRepo.EXPECT().WithTx(gomock.Any()).Return(mockDisbursementRepo)
+				mockUtilRepo.EXPECT().RunWithTransaction(gomock.Any(), gomock.Any()).DoAndReturn(func(ctx context.Context, handler func(Tx database.SQLDatabase) error) error {
+					return handler(mockSQL)
+				})
 				mockDisbursementRepo.EXPECT().GetByTransactionId(gomock.Any(), "txn-id-1").Return(nil, errors.New("error get from database"))
 			},
 		},
@@ -420,6 +450,7 @@ func Test_disbursementUsecase_ProcessBankCallback(t *testing.T) {
 			disb := disbursementUsecase{
 				bankApi:                tt.fields.bankApi,
 				disbursementRepository: tt.fields.disbursementRepository,
+				utilsRepository:        tt.fields.utilsRepository,
 			}
 			err := disb.ProcessBankCallback(tt.args.ctx, tt.args.bankCallback)
 			assert.Equal(t, tt.wantErr, err)

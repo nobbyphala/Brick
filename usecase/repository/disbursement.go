@@ -24,6 +24,12 @@ func NewDisbursement(deps DisbursementDeps) *disbursementRepository {
 	}
 }
 
+func (disb disbursementRepository) WithTx(Tx database.SQLDatabase) Disbursement {
+	return disbursementRepository{
+		db: Tx,
+	}
+}
+
 func (disb disbursementRepository) Insert(ctx context.Context, disbursement domain.Disbursement) (string, error) {
 	var disbursementId string
 

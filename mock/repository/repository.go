@@ -14,6 +14,8 @@ import (
 	reflect "reflect"
 
 	domain "github.com/nobbyphala/Brick/domain"
+	database "github.com/nobbyphala/Brick/external/database"
+	repository "github.com/nobbyphala/Brick/usecase/repository"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -82,4 +84,55 @@ func (m *MockDisbursement) UpdateById(ctx context.Context, id string, updatedDat
 func (mr *MockDisbursementMockRecorder) UpdateById(ctx, id, updatedData any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateById", reflect.TypeOf((*MockDisbursement)(nil).UpdateById), ctx, id, updatedData)
+}
+
+// WithTx mocks base method.
+func (m *MockDisbursement) WithTx(Tx database.SQLDatabase) repository.Disbursement {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WithTx", Tx)
+	ret0, _ := ret[0].(repository.Disbursement)
+	return ret0
+}
+
+// WithTx indicates an expected call of WithTx.
+func (mr *MockDisbursementMockRecorder) WithTx(Tx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WithTx", reflect.TypeOf((*MockDisbursement)(nil).WithTx), Tx)
+}
+
+// MockUtils is a mock of Utils interface.
+type MockUtils struct {
+	ctrl     *gomock.Controller
+	recorder *MockUtilsMockRecorder
+}
+
+// MockUtilsMockRecorder is the mock recorder for MockUtils.
+type MockUtilsMockRecorder struct {
+	mock *MockUtils
+}
+
+// NewMockUtils creates a new mock instance.
+func NewMockUtils(ctrl *gomock.Controller) *MockUtils {
+	mock := &MockUtils{ctrl: ctrl}
+	mock.recorder = &MockUtilsMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockUtils) EXPECT() *MockUtilsMockRecorder {
+	return m.recorder
+}
+
+// RunWithTransaction mocks base method.
+func (m *MockUtils) RunWithTransaction(ctx context.Context, handler func(database.SQLDatabase) error) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RunWithTransaction", ctx, handler)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RunWithTransaction indicates an expected call of RunWithTransaction.
+func (mr *MockUtilsMockRecorder) RunWithTransaction(ctx, handler any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunWithTransaction", reflect.TypeOf((*MockUtils)(nil).RunWithTransaction), ctx, handler)
 }

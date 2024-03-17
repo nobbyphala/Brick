@@ -8,7 +8,13 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+// for now the sqlx not wrapped
+
 type PostgresSQLOpts struct {
+	DB *sqlx.DB
+}
+
+type ConnectionOption struct {
 	Host     string
 	Port     int
 	User     string
@@ -20,7 +26,7 @@ type postgresSql struct {
 	db *sqlx.DB
 }
 
-func NewPostgresSql(opts PostgresSQLOpts) (*postgresSql, error) {
+func NewPostgresDB(opts ConnectionOption) (*sqlx.DB, error) {
 	db, err := sqlx.Connect("pgx", fmt.Sprintf("user=%s dbname=%s host=%s port=%d password=%s sslmode=disable",
 		opts.User,
 		opts.Database,
@@ -32,9 +38,13 @@ func NewPostgresSql(opts PostgresSQLOpts) (*postgresSql, error) {
 		return nil, err
 	}
 
+	return db, nil
+}
+
+func NewPostgresSqlClient(opts PostgresSQLOpts) *postgresSql {
 	return &postgresSql{
-		db: db,
-	}, nil
+		db: opts.DB,
+	}
 }
 
 func (pgs *postgresSql) Get(ctx context.Context, dest interface{}, query string, args ...interface{}) error {
@@ -47,4 +57,30 @@ func (pgs *postgresSql) Exec(ctx context.Context, query string, args ...interfac
 
 func (pgs *postgresSql) Query(ctx context.Context, query string, args ...interface{}) Row {
 	return pgs.db.QueryRowContext(ctx, query, args...)
+}
+
+type PostgresSqlTxOpts struct {
+	Tx *sqlx.Tx
+}
+
+func NewPostgresSqlTx(opts PostgresSqlTxOpts) *postgresSqlTx {
+	return &postgresSqlTx{
+		tx: opts.Tx,
+	}
+}
+
+type postgresSqlTx struct {
+	tx *sqlx.Tx
+}
+
+func (pgsx *postgresSqlTx) Get(ctx context.Context, dest interface{}, query string, args ...interface{}) error {
+	return pgsx.tx.GetContext(ctx, dest, query, args...)
+}
+
+func (pgsx *postgresSqlTx) Exec(ctx context.Context, query string, args ...interface{}) (Result, error) {
+	return pgsx.tx.ExecContext(ctx, query, args...)
+}
+
+func (pgsx *postgresSqlTx) Query(ctx context.Context, query string, args ...interface{}) Row {
+	return pgsx.tx.QueryRowContext(ctx, query, args...)
 }

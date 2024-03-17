@@ -14,7 +14,7 @@ import (
 
 func main() {
 	// init driver or framework
-	postgresSql, err := database.NewPostgresSql(database.PostgresSQLOpts{
+	db, err := database.NewPostgresDB(database.ConnectionOption{
 		Host:     config.DB_HOST,
 		Port:     config.DB_PORT,
 		User:     config.DB_USER,
@@ -25,9 +25,16 @@ func main() {
 		log.Panicln(err)
 	}
 
+	postgresSql := database.NewPostgresSqlClient(database.PostgresSQLOpts{
+		DB: db,
+	})
+
 	// repository
 	disbursementRepository := repository.NewDisbursement(repository.DisbursementDeps{
 		DB: postgresSql,
+	})
+	utilsRepository := repository.NewRepositoryUtils(repository.UtilsOpts{
+		DB: db,
 	})
 
 	// api
@@ -39,6 +46,7 @@ func main() {
 	// usecase
 	disbursementUsecase := usecase.NewDisbursement(usecase.DisbursementDeps{
 		BankApi:                bankApi,
+		UtilsRepository:        utilsRepository,
 		DisbursementRepository: disbursementRepository,
 	})
 
