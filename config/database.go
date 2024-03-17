@@ -1,5 +1,6 @@
 package config
 
+// harcoded
 const (
 	DB_HOST     = "localhost"
 	DB_PORT     = 5432

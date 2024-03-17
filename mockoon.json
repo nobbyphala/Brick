@@ -1,0 +1,148 @@
+{
+  "uuid": "d6adcaaa-9857-4737-b43c-b84824bf2303",
+  "lastMigration": 32,
+  "name": "Bank Demo Api",
+  "endpointPrefix": "",
+  "latency": 0,
+  "port": 3000,
+  "hostname": "",
+  "folders": [],
+  "routes": [
+    {
+      "uuid": "d55f5c7a-8e5a-483b-b945-4804b5e58706",
+      "type": "http",
+      "documentation": "",
+      "method": "post",
+      "endpoint": "verify",
+      "responses": [
+        {
+          "uuid": "7c48ff6d-17fd-48f9-ab00-6c48b6b70749",
+          "body": "{\n  \"account_holder_name\": \"User Test 1\",\n  \"account_holder_number\": \"6749823467\",\n  \"account_status\": \"status: account verified\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "body",
+              "modifier": "",
+              "value": "",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "0e412426-7250-41d3-a35f-6439b0ac2c95",
+          "body": "{}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    },
+    {
+      "uuid": "75f3f844-11ce-4af8-a11e-2b687fffefa3",
+      "type": "http",
+      "documentation": "",
+      "method": "post",
+      "endpoint": "transfer",
+      "responses": [
+        {
+          "uuid": "c527fdf9-5a68-47d9-b142-a724f688e368",
+          "body": "{\n  \"transaction_id\": \"50287adf-0eea-4173-9151-2a088238d6a8\",\n  \"account_holder_name\": \"test account holder name\",\n  \"account_holder_number\": \"908234987\",\n  \"destination_bank_code\": \"BANK_A\",\n  \"amount\": 60000,\n  \"transfer_status\": \"ACCEPTED\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null
+    }
+  ],
+  "rootChildren": [
+    {
+      "type": "route",
+      "uuid": "d55f5c7a-8e5a-483b-b945-4804b5e58706"
+    },
+    {
+      "type": "route",
+      "uuid": "75f3f844-11ce-4af8-a11e-2b687fffefa3"
+    }
+  ],
+  "proxyMode": false,
+  "proxyHost": "",
+  "proxyRemovePrefix": false,
+  "tlsOptions": {
+    "enabled": false,
+    "type": "CERT",
+    "pfxPath": "",
+    "certPath": "",
+    "keyPath": "",
+    "caPath": "",
+    "passphrase": ""
+  },
+  "cors": true,
+  "headers": [
+    {
+      "key": "Content-Type",
+      "value": "application/json"
+    }
+  ],
+  "proxyReqHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "proxyResHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "data": [
+    {
+      "uuid": "8ac61dce-cf1d-4ae6-8a0b-5b9a42d4ee06",
+      "id": "rfdk",
+      "name": "Users",
+      "documentation": "",
+      "value": "[\n  {{#repeat 50}}\n  {\n    \"id\": \"{{faker 'string.uuid'}}\",\n    \"username\": \"{{faker 'internet.userName'}}\"\n  }\n  {{/repeat}}\n]"
+    }
+  ],
+  "callbacks": []
+}
