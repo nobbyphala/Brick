@@ -45,6 +45,7 @@ func (ctrl DisbursementController) VerifyDisbursement(ctx *gin.Context) {
 		RecipientName:          requestBody.RecipientName,
 		RecipientAccountNumber: requestBody.RecipientAccountNumber,
 		RecipientBankCode:      requestBody.RecipientBankCode,
+		Amount:                 requestBody.Amount,
 	})
 	if err != nil {
 		SendErrorResponse(ctx, err)

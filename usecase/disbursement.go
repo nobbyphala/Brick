@@ -20,8 +20,8 @@ type DisbursementDeps struct {
 	DisbursementRepository repository.Disbursement
 }
 
-func NewDisbursement(deps DisbursementDeps) disbursementUsecase {
-	return disbursementUsecase{
+func NewDisbursement(deps DisbursementDeps) *disbursementUsecase {
+	return &disbursementUsecase{
 		bankApi:                deps.BankApi,
 		disbursementRepository: deps.DisbursementRepository,
 	}
@@ -81,7 +81,8 @@ func (disb disbursementUsecase) Disburse(ctx context.Context, disbursement domai
 	}
 
 	disbursement.Id = insertedId
-	disbursement.Status = disb.mapTransferStatusToDisbursementStatus(transferResponse.TransferStatus)
+	disbursement.BankTransactionId = transferResponse.TransactionId
+	disbursement.Status = domain.DisbursementStatusPending
 
 	return disbursement, nil
 }
@@ -101,7 +102,7 @@ func (disb disbursementUsecase) ProcessBankCallback(ctx context.Context, bankCal
 	if disbursement.Status != domain.DisbursementStatusPending {
 		// invalid status need manual intervention
 		err = internal_error.ErrDisbursementInvalidStatus
-		log.Println(fmt.Sprintf("error status should be %s but got %s", domain.DisbursementStatusPending, disbursement.Status))
+		log.Println(fmt.Sprintf("error status should be %d but got %d", domain.DisbursementStatusPending, disbursement.Status))
 		return err
 	}
 

@@ -4,8 +4,8 @@ import "errors"
 
 var (
 	ErrVerifyDisbursement    = errors.New("error when trying verify disbursement")
-	ErrVerifyAccountNotFound = errors.New("error account not found")
-	ErrVerifyAccountBlocked  = errors.New("error account is blocked")
+	ErrVerifyAccountNotFound = errors.New("error bank account not found")
+	ErrVerifyAccountBlocked  = errors.New("error bank account is blocked")
 
 	ErrDisburseDisbursement = errors.New("error when try to disburse")
 	ErrDisburseBankError    = errors.New("temporary bank network error")

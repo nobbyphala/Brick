@@ -2,7 +2,10 @@ package validator
 
 import (
 	"errors"
+	"github.com/go-playground/locales/en"
+	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
+	en_translations "github.com/go-playground/validator/v10/translations/en"
 )
 
 type Validator interface {
@@ -10,15 +13,27 @@ type Validator interface {
 }
 
 func NewValidator() *customValidator {
-	return &customValidator{validate: validator.New()}
+	en := en.New()
+	uni := ut.New(en, en)
+
+	translator, _ := uni.GetTranslator("en")
+
+	validate := validator.New()
+	en_translations.RegisterDefaultTranslations(validate, translator)
+
+	return &customValidator{
+		validate:   validate,
+		translator: translator,
+	}
 }
 
 type customValidator struct {
-	validate *validator.Validate
+	validate   *validator.Validate
+	translator ut.Translator
 }
 
-func (val customValidator) ValidateStruct(s interface{}) []ValidatorError {
-	err := val.validate.Struct(s)
+func (custValidator customValidator) ValidateStruct(s interface{}) []ValidatorError {
+	err := custValidator.validate.Struct(s)
 	if err != nil {
 		var validationErrors validator.ValidationErrors
 		errors.As(err, &validationErrors)
@@ -28,7 +43,7 @@ func (val customValidator) ValidateStruct(s interface{}) []ValidatorError {
 		for _, val := range validationErrors {
 			res = append(res, ValidatorError{
 				Field: val.Field(),
-				Error: val.Error(),
+				Error: val.Translate(custValidator.translator),
 			})
 		}
 

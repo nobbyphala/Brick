@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"github.com/nobbyphala/Brick/domain"
+	"github.com/nobbyphala/Brick/domain/internal_error"
 	"github.com/nobbyphala/Brick/external/database"
 	"github.com/nobbyphala/Brick/usecase/repository/model"
 )
@@ -34,7 +35,7 @@ func (disb disbursementRepository) Insert(ctx context.Context, disbursement doma
 		disbursement.RecipientBankCode,
 		disbursement.BankTransactionId,
 		disbursement.Amount,
-		disbursement.Status,
+		disbursement.Status.ToInt(),
 	).Scan(&disbursementId)
 	if err != nil {
 		return "", err
@@ -44,7 +45,7 @@ func (disb disbursementRepository) Insert(ctx context.Context, disbursement doma
 }
 
 func (disb disbursementRepository) UpdateById(ctx context.Context, id string, updatedData domain.Disbursement) error {
-	_, err := disb.db.Exec(
+	res, err := disb.db.Exec(
 		ctx,
 		queryUpdateDisbursement,
 		updatedData.RecipientName,
@@ -54,8 +55,20 @@ func (disb disbursementRepository) UpdateById(ctx context.Context, id string, up
 		updatedData.Amount,
 		updatedData.Status,
 		id)
+	if err != nil {
+		return err
+	}
 
-	return err
+	rowAffected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowAffected == 0 {
+		return internal_error.ErrNoRowsAffected
+	}
+
+	return nil
 }
 
 func (disb disbursementRepository) GetByTransactionId(ctx context.Context, bankTransactionId string) (*domain.Disbursement, error) {
