@@ -39,8 +39,9 @@ variable needed by the application
 3. This application use Mockoon to mock the third party bank service API. Please go to this link https://mockoon.com/download/#download-section
 to read the details how to install. After Mockoon installed import mockoon.json file and run the mock api server. 
 If you plan to mock using another service please change the base url config here https://github.com/nobbyphala/Brick/blob/337ba33b16cad8902c20e4b6b08bc833480aed19/config/bank.go#L4.
-
 Note: I use Mockoon instead of mockapi.io because it's free and open source
+
+4. Import **postman.json** to your Postman application and test the API
 
 ## Improvement
 This section explain a bit about what can be improved from this project

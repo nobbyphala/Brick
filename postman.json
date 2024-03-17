@@ -1,0 +1,64 @@
+{
+	"info": {
+		"_postman_id": "a8ae2078-9c1f-4895-8788-c3069f56e81a",
+		"name": "Brick",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "1392715"
+	},
+	"item": [
+		{
+			"name": "localhost:8080/disbursement/verify",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"recipient_name\": \"Jimmy Kilback\",\n    \"recipient_account_number\": \"2\",\n    \"recipient_bank_code\": \"BANK_A\",\n    \"amount\": 60000\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "localhost:8080/disbursement/verify"
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:8080/disbursement",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"recipient_name\": \"Jimmy Kilback\",\n    \"recipient_account_number\": \"2\",\n    \"recipient_bank_code\": \"BANK_A\",\n    \"amount\": 60000\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "localhost:8080/disbursement"
+			},
+			"response": []
+		},
+		{
+			"name": "localhost:8080/disbursement",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"transaction_id\": \"50287adf-0eea-4173-9151-2a088238d6a8\",\n    \"status\": \"COMPLETED\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": "localhost:8080/disbursement"
+			},
+			"response": []
+		}
+	]
+}
