@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"github.com/nobbyphala/Brick/domain"
 	"github.com/nobbyphala/Brick/external/database"
 	"github.com/nobbyphala/Brick/usecase/repository/model"
 )
@@ -22,7 +23,7 @@ func NewDisbursement(deps DisbursementDeps) *disbursementRepository {
 	}
 }
 
-func (disb disbursementRepository) Insert(ctx context.Context, disbursement model.Disbursement) (string, error) {
+func (disb disbursementRepository) Insert(ctx context.Context, disbursement domain.Disbursement) (string, error) {
 	var disbursementId string
 
 	err := disb.db.Query(
@@ -31,7 +32,6 @@ func (disb disbursementRepository) Insert(ctx context.Context, disbursement mode
 		disbursement.RecipientName,
 		disbursement.RecipientAccountNumber,
 		disbursement.RecipientBankCode,
-		disbursement.TransferChannel,
 		disbursement.BankTransactionId,
 		disbursement.Amount,
 		disbursement.Status,
@@ -43,14 +43,13 @@ func (disb disbursementRepository) Insert(ctx context.Context, disbursement mode
 	return disbursementId, nil
 }
 
-func (disb disbursementRepository) UpdateById(ctx context.Context, id string, updatedData model.Disbursement) error {
+func (disb disbursementRepository) UpdateById(ctx context.Context, id string, updatedData domain.Disbursement) error {
 	_, err := disb.db.Exec(
 		ctx,
 		queryUpdateDisbursement,
 		updatedData.RecipientName,
 		updatedData.RecipientAccountNumber,
 		updatedData.RecipientBankCode,
-		updatedData.TransferChannel,
 		updatedData.BankTransactionId,
 		updatedData.Amount,
 		updatedData.Status,
@@ -59,7 +58,7 @@ func (disb disbursementRepository) UpdateById(ctx context.Context, id string, up
 	return err
 }
 
-func (disb disbursementRepository) GetByTransactionId(ctx context.Context, bankTransactionId string) (*model.Disbursement, error) {
+func (disb disbursementRepository) GetByTransactionId(ctx context.Context, bankTransactionId string) (*domain.Disbursement, error) {
 	var res model.Disbursement
 
 	err := disb.db.Get(ctx, &res, querySelectByBankTransactionId, bankTransactionId)
@@ -71,5 +70,13 @@ func (disb disbursementRepository) GetByTransactionId(ctx context.Context, bankT
 		return nil, err
 	}
 
-	return &res, nil
+	return &domain.Disbursement{
+		Id:                     res.Id,
+		RecipientName:          res.RecipientName,
+		RecipientAccountNumber: res.RecipientAccountNumber,
+		RecipientBankCode:      res.RecipientBankCode,
+		BankTransactionId:      res.BankTransactionId,
+		Amount:                 res.Amount,
+		Status:                 domain.DisbursementStatus(res.Status),
+	}, nil
 }

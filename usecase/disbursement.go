@@ -7,9 +7,7 @@ import (
 	"github.com/nobbyphala/Brick/domain/internal_error"
 	"github.com/nobbyphala/Brick/usecase/api"
 	"github.com/nobbyphala/Brick/usecase/repository"
-	"github.com/nobbyphala/Brick/usecase/repository/model"
 	"log"
-	"time"
 )
 
 type disbursementUsecase struct {
@@ -69,16 +67,13 @@ func (disb disbursementUsecase) Disburse(ctx context.Context, disbursement domai
 		return domain.Disbursement{}, internal_error.ErrDisburseBankError
 	}
 
-	insertedId, err := disb.disbursementRepository.Insert(ctx, model.Disbursement{
+	insertedId, err := disb.disbursementRepository.Insert(ctx, domain.Disbursement{
 		RecipientName:          disbursement.RecipientName,
 		RecipientAccountNumber: disbursement.RecipientAccountNumber,
 		RecipientBankCode:      disbursement.RecipientBankCode,
-		TransferChannel:        disbursement.TransferChannel,
 		BankTransactionId:      transferResponse.TransactionId,
 		Amount:                 disbursement.Amount,
-		Status:                 domain.DisbursementStatusPending.ToInt(),
-		CreatedAt:              time.Time{},
-		UpdatedAt:              time.Time{},
+		Status:                 domain.DisbursementStatusPending,
 	})
 	if err != nil {
 		log.Println(err)
@@ -103,21 +98,20 @@ func (disb disbursementUsecase) ProcessBankCallback(ctx context.Context, bankCal
 		return internal_error.ErrDisbursementNotFound
 	}
 
-	if disbursement.Status != domain.DisbursementStatusPending.ToInt() {
+	if disbursement.Status != domain.DisbursementStatusPending {
 		// invalid status need manual intervention
 		err = internal_error.ErrDisbursementInvalidStatus
 		log.Println(fmt.Sprintf("error status should be %s but got %s", domain.DisbursementStatusPending, disbursement.Status))
 		return err
 	}
 
-	err = disb.disbursementRepository.UpdateById(ctx, disbursement.Id, model.Disbursement{
+	err = disb.disbursementRepository.UpdateById(ctx, disbursement.Id, domain.Disbursement{
 		RecipientName:          disbursement.RecipientName,
 		RecipientAccountNumber: disbursement.RecipientAccountNumber,
 		RecipientBankCode:      disbursement.RecipientBankCode,
-		TransferChannel:        disbursement.TransferChannel,
 		BankTransactionId:      disbursement.BankTransactionId,
 		Amount:                 disbursement.Amount,
-		Status:                 disb.mapTransferStatusToDisbursementStatus(bankCallback.Status).ToInt(),
+		Status:                 disb.mapTransferStatusToDisbursementStatus(bankCallback.Status),
 	})
 	if err != nil {
 		log.Println(err)

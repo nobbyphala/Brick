@@ -7,7 +7,6 @@ CREATE TABLE public.disbursement (
                                      recipient_name varchar NOT NULL,
                                      recipient_account_number varchar NOT NULL,
                                      recipient_bank_code varchar NOT NULL,
-                                     transfer_channel varchar NOT NULL,
                                      bank_transaction_id varchar NOT NULL,
                                      amount int8 NOT NULL,
                                      status int NULL,

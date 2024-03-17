@@ -44,7 +44,7 @@ type Disbursement struct {
 	RecipientName          string
 	RecipientAccountNumber string
 	RecipientBankCode      string
-	TransferChannel        string // channel or bank used for doing the transfer
+	BankTransactionId      string // reference id to bank partner
 	Amount                 int64
 	Status                 DisbursementStatus // status of the disbursement
 }

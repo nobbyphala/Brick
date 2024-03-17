@@ -8,7 +8,6 @@ const (
 		 recipient_name, 
 		 recipient_account_number, 
 		 recipient_bank_code, 
-		 transfer_channel, 
 		 bank_transaction_id, 
 		 amount,
 		 status,
@@ -16,7 +15,7 @@ const (
 		 updated_at
 		 )
 	VALUES
-		($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+		($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 	RETURNING
 		id`
 
@@ -27,10 +26,10 @@ const (
 		recipient_name = $1, 
 		recipient_account_number = $2, 
 		recipient_bank_code = $3, 
-		transfer_channel = $4, 
-		bank_transaction_id = $5, 
-		amount = $6,
-		status = $7
+		bank_transaction_id = $4, 
+		amount = $5,
+		status = $6,
+		updated_at = CURRENT_TIMESTAMP
 	WHERE
 		id = $8`
 
